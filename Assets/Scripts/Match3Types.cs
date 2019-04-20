@@ -8,11 +8,11 @@ namespace Match3Types {
     /// </summary>
     public class Match3Game : IDisposable
     {
-        private int[,] Map { get; set; }
-        private int XMax { get; set; }
-        private int YMax { get; set; }
-        private int KindsCount { get; set; }
-        private int Score { get; set; }
+        readonly int[,] Map;
+        readonly int XMax;
+        readonly int YMax;
+        readonly int KindsCount;
+        private int _score;
         public event Action<int[,]> OnUpdateMap;
         public event Action<int, int> OnUpdateScore;
 
@@ -27,7 +27,7 @@ namespace Match3Types {
 
             XMax = columns; YMax = rows;
             KindsCount = kinds;
-            Score = 0;
+            _score = 0;
             Map = new int[XMax, YMax];
 
             if (handler != null)
@@ -229,8 +229,8 @@ namespace Match3Types {
 
             if (scoring && earnedScore > 0)
             {
-                Score += earnedScore;
-                OnUpdateScore?.Invoke(Score, earnedScore);
+                _score += earnedScore;
+                OnUpdateScore?.Invoke(_score, earnedScore);
             }
 
             return matchedUnits;

@@ -14,12 +14,12 @@ public class UnitInfo : MonoBehaviour {
     public Position MPos;
 
     public int Id { get; private set; }
-    private float Size { get; set; }
-    private Vector3 TargetPos { get; set; }
-    private Color TargetColor { get; set; }
-    private int TargetId { get; set; }
-    private Vector3 diedScale = new Vector3(0.1f, 0.1f, 1f);
-    private Vector3 bornScale = new Vector3(1f, 1f, 1f);
+    private float _size;
+    private Vector3 _targetPos;
+    private Color _targetColor;
+    private int _targetId;
+    private Vector3 _diedScale = new Vector3(0.1f, 0.1f, 1f);
+    private Vector3 _bornScale = new Vector3(1f, 1f, 1f);
 
 
     private void Start()
@@ -38,7 +38,7 @@ public class UnitInfo : MonoBehaviour {
         if (size <= 0)
             throw new System.ArgumentException(string.Format("SetupUnit Error: size = {0} ; value must be greater than or equal to 0.", size));
 
-        Size = size;
+        _size = size;
         RTrans.localPosition = new Vector3(pos.X * size, pos.Y * size, 0f);
 
         RTrans.sizeDelta = new Vector2(size, size);
@@ -89,7 +89,7 @@ public class UnitInfo : MonoBehaviour {
     /// <param name="pos"></param>
     public void SetNewPosition(Position pos)
     {
-        TargetPos = new Vector3(pos.X * Size, pos.Y * Size, 0f);
+        _targetPos = new Vector3(pos.X * _size, pos.Y * _size, 0f);
         MPos = pos;
     }
 
@@ -100,9 +100,9 @@ public class UnitInfo : MonoBehaviour {
     /// <returns></returns>
     private bool Move(float speed)
     {
-        if (RTrans.localPosition != TargetPos)
+        if (RTrans.localPosition != _targetPos)
         {
-            RTrans.localPosition = Vector3.MoveTowards(RTrans.localPosition, TargetPos, Time.deltaTime * speed);
+            RTrans.localPosition = Vector3.MoveTowards(RTrans.localPosition, _targetPos, Time.deltaTime * speed);
             return true;
         }
         else                    
@@ -116,9 +116,9 @@ public class UnitInfo : MonoBehaviour {
     /// <returns></returns>
     private bool Die(float speed)
     {
-        if (RTrans.localScale != diedScale)
+        if (RTrans.localScale != _diedScale)
         {
-            RTrans.localScale = Vector3.MoveTowards(RTrans.localScale, diedScale, Time.deltaTime * speed * 0.04f);
+            RTrans.localScale = Vector3.MoveTowards(RTrans.localScale, _diedScale, Time.deltaTime * speed * 0.04f);
             return true;
         }
         else
@@ -136,9 +136,9 @@ public class UnitInfo : MonoBehaviour {
     /// <returns></returns>
     private bool Born(float speed)
     {
-        if (RTrans.localScale != bornScale)
+        if (RTrans.localScale != _bornScale)
         {
-            RTrans.localScale = Vector3.MoveTowards(RTrans.localScale, bornScale, Time.deltaTime * speed * 0.04f);
+            RTrans.localScale = Vector3.MoveTowards(RTrans.localScale, _bornScale, Time.deltaTime * speed * 0.04f);
             return true;
         }
         else
@@ -150,7 +150,7 @@ public class UnitInfo : MonoBehaviour {
     /// </summary>
     public void Reborn()
     {        
-        RTrans.localPosition = new Vector3(MPos.X * Size, MPos.Y * Size, 0f);        
+        RTrans.localPosition = new Vector3(MPos.X * _size, MPos.Y * _size, 0f);        
     }
 
     /// <summary>
@@ -200,8 +200,8 @@ public class UnitInfo : MonoBehaviour {
     /// <param name="color"></param>
     public void SetNewUnitIdAndColor(int id, Color color)
     {
-        TargetId = id;
-        TargetColor = color;
+        _targetId = id;
+        _targetColor = color;
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ public class UnitInfo : MonoBehaviour {
     /// </summary>
     private void UpdateUnitIdAndColor()
     {
-        Id = TargetId;
-        Img.color = TargetColor;
+        Id = _targetId;
+        Img.color = _targetColor;
     }
 }

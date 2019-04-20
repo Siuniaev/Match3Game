@@ -10,21 +10,21 @@ public class TextTweener : MonoBehaviour {
     public Text Text;
     public float Speed;
     
-    private Color EarlyColor { get; set; }
-    private Color FadedColor { get; set; }
-    private bool IsMoving { get; set; }
-    private Vector3 EarlyPos { get; set; }
-    private Vector3 TargetPos { get; set; }
+    private Color _earlyColor;
+    private Color _fadedColor;
+    private bool _isMoving;
+    private Vector3 _earlyPos;
+    private Vector3 _targetPos;
 
     /// <summary>
     /// Save the original parameters for the start of the tweens.
     /// </summary>
     private void Awake()
     {        
-        EarlyColor = Text.color;
-        FadedColor = new Color(EarlyColor.r, EarlyColor.g, EarlyColor.b, 0f);
-        EarlyPos = RTrans.localPosition;
-        TargetPos = new Vector3(EarlyPos.x, EarlyPos.y + 50f, 1f);
+        _earlyColor = Text.color;
+        _fadedColor = new Color(_earlyColor.r, _earlyColor.g, _earlyColor.b, 0f);
+        _earlyPos = RTrans.localPosition;
+        _targetPos = new Vector3(_earlyPos.x, _earlyPos.y + 50f, 1f);
     }
 
     /// <summary>
@@ -39,23 +39,23 @@ public class TextTweener : MonoBehaviour {
         //Set the starting position and color.
         if (withMoving)
         {            
-            RTrans.localPosition = EarlyPos;
-            Text.color = EarlyColor;            
-            IsMoving = true;
+            RTrans.localPosition = _earlyPos;
+            Text.color = _earlyColor;            
+            _isMoving = true;
         }
     }    
 
     private void FixedUpdate()
     {
-        if (!IsMoving) return;
+        if (!_isMoving) return;
 
         //Change the text color and move it to a given position.
-        if (RTrans.localPosition != TargetPos)
+        if (RTrans.localPosition != _targetPos)
         {            
-            RTrans.localPosition = Vector3.MoveTowards(RTrans.localPosition, TargetPos, Time.deltaTime * Speed * 25);
-            Text.color = Color.Lerp(Text.color, FadedColor, Time.deltaTime * Speed * 2.5f);
+            RTrans.localPosition = Vector3.MoveTowards(RTrans.localPosition, _targetPos, Time.deltaTime * Speed * 25);
+            Text.color = Color.Lerp(Text.color, _fadedColor, Time.deltaTime * Speed * 2.5f);
         }
         else
-            IsMoving = false;
+            _isMoving = false;
     }
 }
