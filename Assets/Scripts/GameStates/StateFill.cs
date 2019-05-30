@@ -11,11 +11,11 @@
 
             if (game.CheckForMatches())
             {
-                game.state = Match3GameStates.ShowMatch;
+                game.State = Match3GameStates.ShowMatch;
                 game.Invoke("NextState", 0.5f); //delay
             }
             else
-                game.state = Match3GameStates.Wait;
+                game.State = Match3GameStates.Wait;
         }
 
         public void MoveUnits(GameManager game)

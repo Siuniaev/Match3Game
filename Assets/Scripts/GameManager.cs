@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     public float UnitSize = 50f;
     public float UnitSpeed = 200f;
 
-    public IMatch3GameState state = Match3GameStates.Wait; //Current game state.
+    public IMatch3GameState State = Match3GameStates.Wait; //Current game state.
 
     private Match3Game _game;
     private UnitInfo[,] _unitsArray; //Array of links to unit management scripts.
@@ -155,7 +155,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     {
         if (units == null || units.Length != 2) return;
 
-        state = Match3GameStates.Swap;
+        State = Match3GameStates.Swap;
 
         for (int i = 0; i < 2; i++)
         {
@@ -179,7 +179,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     /// <param name="ci"></param>
     public void UnitClickHandler(UnitInfo ci)
     {
-        if (ci == null || !(state is StateWait)) return;
+        if (ci == null || !(State is StateWait)) return;
 
         if (_selectedUnit == null)
         {
@@ -201,7 +201,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     /// </summary>
     private void FixedUpdate()
     {   
-        state.MoveUnits(this);        
+        State.MoveUnits(this);        
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     /// </summary>
     public void NextState()
     {
-        state.NextGameState(this);
+        State.NextGameState(this);
     }    
 
     /// <summary>

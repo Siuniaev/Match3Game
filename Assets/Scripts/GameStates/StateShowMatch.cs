@@ -7,7 +7,7 @@
     {
         public void NextGameState(GameManager game)
         {
-            game.state = Match3GameStates.Burn;
+            game.State = Match3GameStates.Burn;
         }
 
         public void MoveUnits(GameManager game)
