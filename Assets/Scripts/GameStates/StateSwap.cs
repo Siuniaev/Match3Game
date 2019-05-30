@@ -3,17 +3,17 @@
     /// <summary>
     /// The state of units swapping.
     /// </summary>
-    public class StateSwap : IMatch3GameState
+    class StateSwap : IMatch3GameState
     {
         public void NextGameState(GameManager game)
         {
             if (game.CheckForMatches())
             {
-                game.State = Match3GameStates.ShowMatch;
+                game.SetGameState(Match3GameStates.ShowMatch);
                 game.Invoke("NextState", 0.5f); //delay
             }
             else
-                game.State = Match3GameStates.Wait;
+                game.SetGameState(Match3GameStates.Wait);
         }
 
         public void MoveUnits(GameManager game)

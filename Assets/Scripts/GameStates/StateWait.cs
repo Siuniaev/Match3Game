@@ -3,7 +3,7 @@
     /// <summary>
     /// The state of waiting for player's activity.
     /// </summary>
-    public class StateWait : IMatch3GameState
+    class StateWait : IMatch3GameState
     {
         public void NextGameState(GameManager game)
         {

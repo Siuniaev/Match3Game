@@ -3,11 +3,11 @@
     /// <summary>
     /// The state of matched units burning.
     /// </summary>
-    public class StateBurn : IMatch3GameState
+    class StateBurn : IMatch3GameState
     {
         public void NextGameState(GameManager game)
         {
-            game.State = Match3GameStates.Fall;
+            game.SetGameState(Match3GameStates.Fall);
 
             foreach (UnitInfo unit in game.UnitsToDieAndReborn)
                 unit.Reborn();

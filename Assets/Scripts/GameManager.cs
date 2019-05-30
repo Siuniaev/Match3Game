@@ -25,11 +25,10 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
 
     [Header("Unit Options")]
     public float UnitSize = 50f;
-    public float UnitSpeed = 200f;
-
-    public IMatch3GameState State = Match3GameStates.Wait; //Current game state.
-
+    public float UnitSpeed = 200f;    
+    
     private Match3Game _game;
+    private IMatch3GameState _state; //Current game state.
     private UnitInfo[,] _unitsArray; //Array of links to unit management scripts.
     private Color[] _colors; //Colors for units, assigned by id.
     private UnitInfo _selectedUnit; //Selected by player current unit.        
@@ -103,6 +102,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     {        
         _game?.Dispose();
         _game = new Match3Game(Rows, Columns, ColorsCount, this);
+        SetGameState(Match3GameStates.Wait);        
         ScoreText.text = "0";
         EarnedScoreText.UpdateText("", withMoving: false);
     }
@@ -155,7 +155,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     {
         if (units == null || units.Length != 2) return;
 
-        State = Match3GameStates.Swap;
+        SetGameState(Match3GameStates.Swap);        
 
         for (int i = 0; i < 2; i++)
         {
@@ -179,7 +179,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     /// <param name="ci"></param>
     public void UnitClickHandler(UnitInfo ci)
     {
-        if (ci == null || !(State is StateWait)) return;
+        if (ci == null || !(_state is StateWait)) return;
 
         if (_selectedUnit == null)
         {
@@ -201,7 +201,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     /// </summary>
     private void FixedUpdate()
     {   
-        State.MoveUnits(this);        
+        _state.MoveUnits(this);        
     }
 
     /// <summary>
@@ -209,8 +209,17 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     /// </summary>
     public void NextState()
     {
-        State.NextGameState(this);
-    }    
+        _state.NextGameState(this);
+    }
+
+    /// <summary>
+    /// Set new current game state.
+    /// </summary>
+    /// <param name="state"></param>
+    internal void SetGameState(IMatch3GameState state)
+    {
+        _state = state;
+    }
 
     /// <summary>
     /// Check for matches.

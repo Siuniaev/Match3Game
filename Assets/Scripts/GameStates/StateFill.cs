@@ -3,7 +3,7 @@
     /// <summary>
     /// The state of units filling empty spaces.
     /// </summary>
-    public class StateFill : IMatch3GameState
+    class StateFill : IMatch3GameState
     {
         public void NextGameState(GameManager game)
         {
@@ -11,11 +11,11 @@
 
             if (game.CheckForMatches())
             {
-                game.State = Match3GameStates.ShowMatch;
+                game.SetGameState(Match3GameStates.ShowMatch);
                 game.Invoke("NextState", 0.5f); //delay
             }
             else
-                game.State = Match3GameStates.Wait;
+                game.SetGameState(Match3GameStates.Wait);
         }
 
         public void MoveUnits(GameManager game)

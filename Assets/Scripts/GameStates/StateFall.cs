@@ -3,11 +3,11 @@
     /// <summary>
     /// The state of units falling.
     /// </summary>
-    public class StateFall : IMatch3GameState
+    class StateFall : IMatch3GameState
     {
         public void NextGameState(GameManager game)
         {
-            game.State = Match3GameStates.Fill;
+            game.SetGameState(Match3GameStates.Fill);
 
             foreach (UnitInfo unit in game.UnitsToDieAndReborn)
                 unit.ShowUnit();

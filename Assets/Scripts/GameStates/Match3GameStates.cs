@@ -3,13 +3,13 @@
     /// <summary>
     /// Pre-created game states.
     /// </summary>
-    public static class Match3GameStates
+    static class Match3GameStates
     {
-        public static StateWait Wait = new StateWait();
-        public static StateSwap Swap = new StateSwap();
-        public static StateShowMatch ShowMatch = new StateShowMatch();
-        public static StateBurn Burn = new StateBurn();
-        public static StateFall Fall = new StateFall();
-        public static StateFill Fill = new StateFill();
+        internal static StateWait Wait = new StateWait();
+        internal static StateSwap Swap = new StateSwap();
+        internal static StateShowMatch ShowMatch = new StateShowMatch();
+        internal static StateBurn Burn = new StateBurn();
+        internal static StateFall Fall = new StateFall();
+        internal static StateFill Fill = new StateFill();
     }
 }
