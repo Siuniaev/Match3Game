@@ -8,7 +8,7 @@
         public void NextGameState(GameManager game)
         {
             game.SetGameState(Match3GameStates.Fall);
-
+            
             foreach (UnitInfo unit in game.UnitsToDieAndReborn)
                 unit.Reborn();
         }
