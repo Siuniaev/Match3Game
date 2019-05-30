@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using Match3Types;
+using Match3;
 
 /// <summary>
 /// Control script for unit's gameobject.
@@ -36,7 +36,7 @@ public class UnitInfo : MonoBehaviour {
     public void InitUnit(Position pos, float size)
     {
         if (size <= 0)
-            throw new System.ArgumentException(string.Format("SetupUnit Error: size = {0} ; value must be greater than or equal to 0.", size));
+            throw new System.ArgumentException($"SetupUnit Error: size = {size} ; value must be greater than or equal to 0.");
 
         _size = size;
         RTrans.localPosition = new Vector3(pos.X * size, pos.Y * size, 0f);
@@ -98,7 +98,7 @@ public class UnitInfo : MonoBehaviour {
     /// </summary>
     /// <param name="speed"></param>
     /// <returns></returns>
-    private bool Move(float speed)
+    public bool Move(float speed)
     {
         if (RTrans.localPosition != _targetPos)
         {
@@ -114,7 +114,7 @@ public class UnitInfo : MonoBehaviour {
     /// </summary>
     /// <param name="speed"></param>
     /// <returns></returns>
-    private bool Die(float speed)
+    public bool Die(float speed)
     {
         if (RTrans.localScale != _diedScale)
         {
@@ -134,7 +134,7 @@ public class UnitInfo : MonoBehaviour {
     /// </summary>
     /// <param name="speed"></param>
     /// <returns></returns>
-    private bool Born(float speed)
+    public bool Born(float speed)
     {
         if (RTrans.localScale != _bornScale)
         {
@@ -152,27 +152,6 @@ public class UnitInfo : MonoBehaviour {
     {        
         RTrans.localPosition = new Vector3(MPos.X * _size, MPos.Y * _size, 0f);        
     }
-
-    /// <summary>
-    /// Select and perform unit action at a given speed according to the game state.
-    /// </summary>
-    /// <param name="state"></param>
-    /// <param name="speed"></param>
-    /// <returns></returns>
-    public bool DoAction(GameState state, float speed)
-    {
-        bool ok = false;
-
-        switch (state)
-        {
-            case GameState.Swap: ok = Move(speed); break;
-            case GameState.Fall: ok = Move(speed * 2f); break;
-            case GameState.Burn: ok = Die(speed); break;
-            case GameState.Fill: ok = Born(speed); break;
-        }
-
-        return ok;
-    }    
 
     /// <summary>
     /// Hide or show unit.

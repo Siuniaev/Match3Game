@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 
-namespace Match3Types {
+namespace Match3 {
 
     /// <summary>
     /// The main class of Match3 game.
@@ -23,7 +23,7 @@ namespace Match3Types {
         public Match3Game(int rows, int columns, int kinds, IMatch3GameHandler handler)
         {
             if (rows < 3 || columns < 3 || kinds < 3)                
-                throw new Match3Exception(string.Format("New Match3Game Error: rows = {0} ; columns = {1}; kinds = {2}, values must be greater than 2.", rows, columns, kinds));
+                throw new Match3Exception($"New Match3Game Error: rows = {rows} ; columns = {columns}; kinds = {kinds}, values must be greater than 2.");
 
             XMax = columns; YMax = rows;
             KindsCount = kinds;
@@ -44,11 +44,11 @@ namespace Match3Types {
         /// </summary>
         private void InitMap()
         {
-            Random r = new Random();
+            var random = new Random();
 
             for (int x = 0; x < XMax; x++)
                 for (int y = 0; y < YMax; y++)
-                    Map[x, y] = r.Next(0, KindsCount);
+                    Map[x, y] = random.Next(0, KindsCount);
             
             ClearMapForAllMatches();
 
@@ -60,8 +60,8 @@ namespace Match3Types {
         /// </summary>
         private void ClearMapForAllMatches()
         {
-            Random r = new Random();
-            bool needClear = true;
+            var random = new Random();
+            var needClear = true;
 
             while (needClear)
             {
@@ -74,10 +74,10 @@ namespace Match3Types {
                         if (matches.Count > 0)
                         {
                             needClear = true;
-                            List<Position> matchedUnits = RemoveMatches(matches, scoring: false); //no scoring
+                            var matchedUnits = RemoveMatches(matches, scoring: false); //no scoring
 
                             foreach (Position pos in matchedUnits)
-                                Map[pos.X, pos.Y] = r.Next(0, KindsCount);
+                                Map[pos.X, pos.Y] = random.Next(0, KindsCount);
                         }
                     }
                 }
@@ -126,18 +126,19 @@ namespace Match3Types {
         /// <returns></returns>
         private List<List<Position>> GetMatches(params Position[] poss)
         {
-            List<List<Position>> allMatches = new List<List<Position>>();            
+            var allMatches = new List<List<Position>>();            
 
             foreach (Position unit in poss)
             {
-                List<Position> horizontalMatches = new List<Position>();
-                List<Position> verticalMatches = new List<Position>();
+                var horizontalMatches = new List<Position>();
+                var verticalMatches = new List<Position>();
 
-                int sample = Map[unit.X, unit.Y];
-                Fill(unit.X, unit.Y, sample, Direction.Left, ref horizontalMatches);
-                Fill(unit.X + 1, unit.Y, sample, Direction.Right, ref horizontalMatches);
-                Fill(unit.X, unit.Y, sample, Direction.Up, ref verticalMatches);
-                Fill(unit.X, unit.Y - 1, sample, Direction.Down, ref verticalMatches);
+                int sample = Map[unit.X, unit.Y];                
+
+                Fill(unit.X, unit.Y, -1, 0, sample, ref horizontalMatches);     //left
+                Fill(unit.X + 1, unit.Y, 1, 0, sample, ref horizontalMatches);  //right
+                Fill(unit.X, unit.Y, 0, 1, sample, ref verticalMatches);        //up
+                Fill(unit.X, unit.Y - 1, 0, -1, sample, ref verticalMatches);   //down
 
                 if (horizontalMatches.Count > 2)
                     allMatches.Add(horizontalMatches);
@@ -157,19 +158,13 @@ namespace Match3Types {
         /// <param name="sample"></param>
         /// <param name="dir"></param>
         /// <param name="matches"></param>
-        private void Fill(int x, int y, int sample, Direction dir, ref List<Position> matches)
+        private void Fill(int x, int y, int xOffset, int yOffset, int sample, ref List<Position> matches)
         {
             if (x >= XMax || x < 0 || y >= YMax || y < 0 || Map[x, y] != sample) return;
 
             matches.Add(new Position(x, y));
 
-            switch (dir)
-            {
-                case Direction.Down: Fill(x, y - 1, sample, dir, ref matches); break;
-                case Direction.Up: Fill(x, y + 1, sample, dir, ref matches); break;
-                case Direction.Left: Fill(x - 1, y, sample, dir, ref matches); break;
-                case Direction.Right: Fill(x + 1, y, sample, dir, ref matches); break;
-            }
+            Fill(x + xOffset, y + yOffset, xOffset, yOffset, sample, ref matches);
         }
 
         /// <summary>
@@ -197,7 +192,7 @@ namespace Match3Types {
             newUnits = FillEmptySpaces();
 
             if (matchedUnits != null && matchedUnits.Count != newUnits.Count)
-                throw new Match3Exception(string.Format("FindAndRemoveMatches Error: matchedUnits.Countt = {0} ; newUnits.Count = {1}; values must be equal.", matchedUnits.Count, newUnits.Count));                
+                throw new Match3Exception($"FindAndRemoveMatches Error: matchedUnits.Count = {matchedUnits.Count} ; newUnits.Count = {newUnits.Count}; values must be equal.");
         }
 
         /// <summary>
@@ -211,7 +206,7 @@ namespace Match3Types {
             if (matches == null || matches.Count == 0) return null;
             
             int earnedScore = 0;
-            List<Position> matchedUnits = new List<Position>();
+            var matchedUnits = new List<Position>();
 
             foreach (var match in matches)
             {
@@ -242,7 +237,7 @@ namespace Match3Types {
         /// <returns></returns>
         private List<PositionVector> FallDown()
         {
-            List<PositionVector> fallingUnits = new List<PositionVector>();
+            var fallingUnits = new List<PositionVector>();
 
             //Along the rows we move up, on each row we move to the right. Finding emptiness, we "dump" the first element found above in this column.
             for (int y = 0; y < YMax; y++) 
@@ -266,8 +261,8 @@ namespace Match3Types {
         /// <returns></returns>
         private List<UnitData> FillEmptySpaces()
         {
-            Random r = new Random();
-            List<UnitData> newUnits = new List<UnitData>();
+            var r = new Random();
+            var newUnits = new List<UnitData>();
 
             for (int x = 0; x < XMax; x++)
                 for (int y = 0; y < YMax; y++)
@@ -318,91 +313,5 @@ namespace Match3Types {
             GC.SuppressFinalize(this);
         }
         #endregion
-    }
-
-    /// <summary>
-    /// Interface for the object of the visible part of the game, which will accept map updates after it has been built, and updates of earned points.
-    /// </summary>
-    public interface IMatch3GameHandler
-    {
-        void MapUpdateHandler(int[,] map);
-        void ScoreUpdateHandler(int currentScore, int earnedScore);
-    }
-
-    /// <summary>
-    /// Units' coordinates.
-    /// </summary>
-    public struct Position
-    {
-        public int X { get; set; }
-        public int Y { get; set; }
-
-        public Position(int x, int y) : this()
-        {
-            X = x;
-            Y = y;
-        }
-    }
-
-    /// <summary>
-    /// Two unit coordinates defining the movement of a unit.
-    /// </summary>
-    public struct PositionVector
-    {
-        public Position From {get; set;}
-        public Position To { get; set; }
-
-        public PositionVector(Position from, Position to) : this()
-        {
-            From = from;
-            To = to;
-        }
-    }
-
-    /// <summary>
-    /// Unit data.
-    /// </summary>
-    public struct UnitData
-    {
-        public int Id { get; set; }
-        public Position Pos { get; set; }
-
-        public UnitData(int id, Position pos) : this()
-        {
-            Id = id;
-            Pos = pos;
-        }
-    }    
-
-    enum Direction
-    {
-        Left,
-        Right,
-        Up,
-        Down
-    }
-
-    public enum GameState
-    {
-        None,
-        Swap,
-        ShowMatch,
-        Burn,
-        Fall,
-        Fill
-    }
-
-    /// <summary>
-    /// Special exception.
-    /// </summary>
-    public class Match3Exception : Exception
-    {
-        public Match3Exception(Exception innerException, string message)
-            : base(message, innerException)
-        { }
-
-        public Match3Exception(string message)
-            : this(null, message)
-        { }
-    }
+    }       
 }

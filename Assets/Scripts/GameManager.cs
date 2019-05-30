@@ -1,16 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Match3Types;
+using Match3;
+using GameStates;
 
 /// <summary>
 /// The main control script of the game.
 /// </summary>
 public class GameManager : MonoBehaviour, IMatch3GameHandler
-{
-    //Singleton instance.
-    public static GameManager Instance { get; private set; }
+{    
+    public static GameManager Instance { get; private set; } //Singleton instance.
 
     public GameObject UnitPrefab;
     public Transform MapTransform;
@@ -28,18 +27,16 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     public float UnitSize = 50f;
     public float UnitSpeed = 200f;
 
+    public IMatch3GameState state = Match3GameStates.Wait; //Current game state.
+
     private Match3Game _game;
     private UnitInfo[,] _unitsArray; //Array of links to unit management scripts.
     private Color[] _colors; //Colors for units, assigned by id.
-    private UnitInfo _selectedUnit; //Selected by player current unit.
-    private GameState _gameState = GameState.None;
+    private UnitInfo _selectedUnit; //Selected by player current unit.        
 
     //Lists of units that need to be moved in FixedUpdate.
-    private List<UnitInfo> _unitsToMove = new List<UnitInfo>();    
-    private List<UnitInfo> _unitsToDieAndReborn = new List<UnitInfo>();
-    private List<UnitInfo> _currentUnits; //current selected units to action
-
-    private bool _movementsFinished;
+    public List<UnitInfo> UnitsToMove { get; private set; } = new List<UnitInfo>();    
+    public List<UnitInfo> UnitsToDieAndReborn { get; private set; } = new List<UnitInfo>();    
 
     //Coordinates where changes occurred in the units, and where we need to check for new matches.
     private List<Position> _unitsPossToCheckMatches = new List<Position>();
@@ -158,11 +155,11 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     {
         if (units == null || units.Length != 2) return;
 
-        _gameState = GameState.Swap;
+        state = Match3GameStates.Swap;
 
         for (int i = 0; i < 2; i++)
         {
-            _unitsToMove.Add(units[i]);
+            UnitsToMove.Add(units[i]);
             _unitsPossToCheckMatches.Add(units[i].MPos);
 
             //Replace links for swapped units in the common array of units.
@@ -182,7 +179,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     /// <param name="ci"></param>
     public void UnitClickHandler(UnitInfo ci)
     {
-        if (ci == null || _gameState != GameState.None) return;
+        if (ci == null || !(state is StateWait)) return;
 
         if (_selectedUnit == null)
         {
@@ -200,92 +197,27 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
     }
 
     /// <summary>
-    /// Performing all unit movements, according to the formed lists of units that need to be moved (UnitsToMove, UnitsToDieAndReborn).
+    /// Performing all unit movements, according to the current game state and formed lists of units that need to be moved (UnitsToMove, UnitsToDieAndReborn).
     /// </summary>
     private void FixedUpdate()
-    {
-        _movementsFinished = true;
-        _currentUnits = null;
-
-        switch (_gameState)
-        {
-            case GameState.Swap:
-            case GameState.Fall:
-                _currentUnits = _unitsToMove; break;
-
-            case GameState.Burn:
-            case GameState.Fill:
-                _currentUnits = _unitsToDieAndReborn; break;
-        }
-
-        if (_currentUnits == null) return;
-
-        foreach (UnitInfo unit in _currentUnits)
-            if (unit.DoAction(_gameState, UnitSpeed))
-                _movementsFinished = false;
-
-        if (_movementsFinished) //The game states switch only after all movements of the current state are completed.
-            NextGameState();
+    {   
+        state.MoveUnits(this);        
     }
 
     /// <summary>
-    /// Delay before the destroing of the matched units.
+    /// After delay switch to the next game state.
     /// </summary>
-    /// <returns></returns>
-    private IEnumerator ShowMatchAndWait()
+    public void NextState()
     {
-        yield return new WaitForSeconds(0.5f);
-        _gameState = GameState.Burn;
-    }
-
-    /// <summary>
-    /// Transition between game states.
-    /// </summary>
-    private void NextGameState()
-    {
-        switch (_gameState)
-        {
-            case GameState.Swap:
-                if (CheckForMatches())
-                {
-                    StartCoroutine(ShowMatchAndWait());
-                    _gameState = GameState.ShowMatch;
-                }
-                else
-                    _gameState = GameState.None;
-                break;
-
-            case GameState.Burn:
-                _gameState = GameState.Fall;
-                foreach (UnitInfo unit in _unitsToDieAndReborn)
-                    unit.Reborn();
-                break;
-
-            case GameState.Fall:
-                _gameState = GameState.Fill;
-                foreach (UnitInfo unit in _unitsToDieAndReborn)
-                    unit.ShowUnit();                
-                break;
-
-            case GameState.Fill:
-                _unitsToDieAndReborn.Clear();
-                if (CheckForMatches())
-                {
-                    StartCoroutine(ShowMatchAndWait());
-                    _gameState = GameState.ShowMatch;
-                }
-                else
-                    _gameState = GameState.None;
-                break;
-        }
-    }
+        state.NextGameState(this);
+    }    
 
     /// <summary>
     /// Check for matches.
     /// If successful, start displaying the received changes in the units, by performing sequentially game states.
     /// </summary>
     /// <returns></returns>
-    private bool CheckForMatches()
+    public bool CheckForMatches()
     {
         //Exit if there are no places to check new matches.
         if (_unitsPossToCheckMatches.Count == 0) return false;
@@ -297,7 +229,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
 
         _game.DoMatchesPipeline(out matchedUnits, out fallingUnits, out newUnits, _unitsPossToCheckMatches.ToArray());
 
-        _unitsToMove.Clear();
+        UnitsToMove.Clear();
         _unitsPossToCheckMatches.Clear();
 
         //Exit if there are no new matches found.
@@ -314,7 +246,7 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
         {
             UnitInfo unit = _unitsArray[pos.From.X, pos.From.Y];
             unit.SetNewPosition(pos.To);
-            _unitsToMove.Add(unit);
+            UnitsToMove.Add(unit);
         }
 
         //Matched units are highlighted and take on new positions and colors for rebirth. And they are added to the list of units to be moved (die and reborn).
@@ -325,14 +257,14 @@ public class GameManager : MonoBehaviour, IMatch3GameHandler
             unit.SetNewPosition(newUnits[i].Pos);
             unit.SetNewUnitIdAndColor(newUnits[i].Id, _colors[newUnits[i].Id]);
             unit.ShowShadow();
-            _unitsToDieAndReborn.Add(unit);
+            UnitsToDieAndReborn.Add(unit);
         }
 
         //Replacing links to units according to their new positions (in which they have to be after their movements).
-        foreach (UnitInfo unit in _unitsToDieAndReborn)
+        foreach (UnitInfo unit in UnitsToDieAndReborn)
             _unitsArray[unit.MPos.X, unit.MPos.Y] = unit;
 
-        foreach (UnitInfo unit in _unitsToMove)
+        foreach (UnitInfo unit in UnitsToMove)
             _unitsArray[unit.MPos.X, unit.MPos.Y] = unit;
 
         return true;
