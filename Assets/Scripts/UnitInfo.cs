@@ -36,7 +36,7 @@ public class UnitInfo : MonoBehaviour {
     public void InitUnit(Position pos, float size)
     {
         if (size <= 0)
-            throw new System.ArgumentException($"SetupUnit Error: size = {size} ; value must be greater than or equal to 0.");
+            throw new System.ArgumentException($"InitUnit Error: size = {size} ; value must be greater than 0.");
 
         _size = size;
         RTrans.localPosition = new Vector3(pos.X * size, pos.Y * size, 0f);
