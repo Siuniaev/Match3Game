@@ -95,7 +95,8 @@ namespace Match3 {
             bool ok = false;
 
             //distance check
-            if ((firstPos.X == secondPos.X && Math.Abs(firstPos.Y - secondPos.Y) == 1) || (firstPos.Y == secondPos.Y && Math.Abs(firstPos.X - secondPos.X) == 1))
+            if ((firstPos.X == secondPos.X && Math.Abs(firstPos.Y - secondPos.Y) == 1) 
+                || (firstPos.Y == secondPos.Y && Math.Abs(firstPos.X - secondPos.X) == 1))
             {
                 SwapUnits(firstPos, secondPos);
                 ok = CheckForExistingMatches(firstPos, secondPos);
@@ -135,10 +136,10 @@ namespace Match3 {
 
                 int sample = Map[unit.X, unit.Y];                
 
-                Fill(unit.X, unit.Y, -1, 0, sample, ref horizontalMatches);     //left
-                Fill(unit.X + 1, unit.Y, 1, 0, sample, ref horizontalMatches);  //right
-                Fill(unit.X, unit.Y, 0, 1, sample, ref verticalMatches);        //up
-                Fill(unit.X, unit.Y - 1, 0, -1, sample, ref verticalMatches);   //down
+                Fill(unit.X, unit.Y, -1, 0, sample, horizontalMatches);     //left
+                Fill(unit.X + 1, unit.Y, 1, 0, sample, horizontalMatches);  //right
+                Fill(unit.X, unit.Y, 0, 1, sample, verticalMatches);        //up
+                Fill(unit.X, unit.Y - 1, 0, -1, sample, verticalMatches);   //down
 
                 if (horizontalMatches.Count > 2)
                     allMatches.Add(horizontalMatches);
@@ -156,15 +157,15 @@ namespace Match3 {
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="sample"></param>
-        /// <param name="dir"></param>
+        /// <param name="xOffset"></param>
+        /// <param name="yOffset"></param>
         /// <param name="matches"></param>
-        private void Fill(int x, int y, int xOffset, int yOffset, int sample, ref List<Position> matches)
+        private void Fill(int x, int y, int xOffset, int yOffset, int sample, List<Position> matches)
         {
-            if (x >= XMax || x < 0 || y >= YMax || y < 0 || Map[x, y] != sample) return;
+            if (x >= XMax || x < 0 || y >= YMax || y < 0 || matches == null || Map[x, y] != sample) return;
 
             matches.Add(new Position(x, y));
-
-            Fill(x + xOffset, y + yOffset, xOffset, yOffset, sample, ref matches);
+            Fill(x + xOffset, y + yOffset, xOffset, yOffset, sample, matches);
         }
 
         /// <summary>
